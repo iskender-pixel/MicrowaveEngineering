@@ -8,6 +8,7 @@ l = 20e-3
     #length [m]
 c0 = 3e8
     #light velocity free space [m/s]
+Z0 = 51.19
 
 #------Functions------
 def getABCDGap(ABCDline, ABCDtotal):
@@ -32,8 +33,8 @@ def getABCDLine(fRange, Z0):
         β = (ω*np.sqrt(epseff))/c0
 
         A = np.cos(β*l)
-        B = 1j*Z0[i]*np.sin(β*l)
-        C = 1j*Y0[i]*np.sin(β*l)
+        B = 1j*Z0*np.sin(β*l)
+        C = 1j*Y0*np.sin(β*l)
         D = np.cos(β*l)
 
         ABCDline[i,:,:] = np.array([[A,B],[C,D]])
@@ -93,27 +94,56 @@ def plotAB(ABCD):
     B = ABCD[:, 0, 1]  # B is the (0, 1) element
 
     # Plotting
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(12, 4))
 
     # Plot real and imaginary parts of A_gap
-    plt.plot(fRange*1e-9, np.real(A), label='Real(A_gap)', color='blue')
-    plt.plot(fRange*1e-9, np.imag(A), label='Imag(A_gap)', linestyle='--', color='blue')
+    # plt.plot(fRange*1e-9, np.real(A), label='Real(A_gap)', color='blue')
+    # plt.plot(fRange*1e-9, np.imag(A), label='Imag(A_gap)', linestyle='--', color='blue')
 
     # Plot real and imaginary parts of B_gap
     plt.plot(fRange * 1e-9, np.real(B), label='Real(B_gap)', color='green')
     plt.plot(fRange * 1e-9, np.imag(B), label='Imag(B_gap)', linestyle='--', color='green')
+    plt.xlim(5,10)
 
     # Adding labels and title
     plt.xlabel('Frequency (GHz)')
     plt.ylabel('Value')
-    plt.title('Real and Imaginary Parts of A/B vs Frequency')
+    plt.title('Real and Imaginary Parts of B vs Frequency')
     plt.legend()
     plt.grid(True)
-    # plt.savefig("A2b_Bgap_realimag")
+    plt.tight_layout()
+    plt.savefig("A2b_Bgap_realimag")
     # Show plot
     plt.show()
 
     return
+
+def PlotCpCg(Cg_list, Cp_list, fRange):
+    # Plotting
+    plt.figure(figsize=(12, 4))
+
+    # Plot Cp vs frequency
+    plt.plot(fRange*1e-9, Cp_list*1e9, label='Cp', color='blue', linestyle='--')
+
+    # Plot Cg vs frequency
+    # plt.plot(fRange*1e-9, Cg_list*1e14, label='Cg', color='green', linestyle='--')
+
+    # Adding labels and title
+    plt.xlabel('Frequency (GHz)')
+    plt.ylabel('Capacitance (nF)')
+    plt.title('Cg vs Frequency')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.ylim(20,70)
+    plt.xlim(5,10)
+    plt.savefig("A2c_Cp_plot")
+
+    # Show plot
+    plt.show()
+
+    return
+
 
 def getCapacitances(ABCDgap, fRange):
 
@@ -126,20 +156,16 @@ def getCapacitances(ABCDgap, fRange):
 
     # print(Zg)
     # print(Zp)
-    Cg = 1/(-1*fRange*2*np.pi*Zg)
-    Cp = 1/(-1*fRange*2*np.pi*Zp)
+    Cg_list = 1/(-1*fRange*2*np.pi*Zg)
+    Cp_list = 1/(-1*fRange*2*np.pi*Zp)
 
-    Cg = sum(Cg)/len(Cg)
-    Cp = sum(Cp)/len(Cp)
+    Cg = sum(Cg_list)/len(Cg_list)
+    Cp = sum(Cp_list)/len(Cp_list)
 
-    return Cg, Cp
+    return Cg, Cp, Cg_list, Cp_list
 
 
 if __name__ == '__main__':
-
-    #Get the values for Z0
-    _, Z0Real, _= ReadTXT("A1_Z0.txt")
-    Z0 = Z0Real
 
     #Get the values for the S11
     fRange, S11Real, S11Imag = ReadTXT("A1_S11_parameters_RealImag.txt")
@@ -157,9 +183,11 @@ if __name__ == '__main__':
 
     ABCDgap = getABCDGap(ABCDline, ABCDtotal)
 
-    # plotAB(ABCDgap)
+    plotAB(ABCDgap)
 
-    Cg, Cp = getCapacitances(ABCDgap, fRange)
+    Cg, Cp, Cg_list, Cp_list = getCapacitances(ABCDgap, fRange)
 
-    print(Cg, Cp)
+    PlotCpCg(Cg_list, Cp_list, fRange)
+
+    print(f"Cg = {Cg}, Cp = {Cp}")
 
