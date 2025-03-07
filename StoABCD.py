@@ -112,7 +112,7 @@ def plotAB(ABCD):
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("A2b_Bgap_realimag")
+    plt.savefig("A1_B_realimag")
     # Show plot
     plt.show()
 
@@ -123,21 +123,21 @@ def PlotCpCg(Cg_list, Cp_list, fRange):
     plt.figure(figsize=(12, 4))
 
     # Plot Cp vs frequency
-    plt.plot(fRange*1e-9, Cp_list*1e9, label='Cp', color='blue', linestyle='--')
+    # plt.plot(fRange*1e-9, Cp_list*1e12, label='Cp', color='blue', linestyle='--')
 
     # Plot Cg vs frequency
-    # plt.plot(fRange*1e-9, Cg_list*1e14, label='Cg', color='green', linestyle='--')
+    plt.plot(fRange*1e-9, Cg_list*1e12, label='Cg', color='green', linestyle='--')
 
     # Adding labels and title
     plt.xlabel('Frequency (GHz)')
-    plt.ylabel('Capacitance (nF)')
+    plt.ylabel('Capacitance (pF)')
     plt.title('Cg vs Frequency')
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
-    plt.ylim(20,70)
+    # plt.ylim(20,70)
     plt.xlim(5,10)
-    plt.savefig("A2c_Cp_plot")
+    plt.savefig("A2c_Cg_plot")
 
     # Show plot
     plt.show()
@@ -150,14 +150,14 @@ def getCapacitances(ABCDgap, fRange):
     A = ABCDgap[:,0,0]
     B = ABCDgap[:,0,1]
 
-    Zg = np.imag(B)
+    Zg = B
 
-    Zp = np.imag(Zg/(A-1))
+    Zp = Zg/(A-1)
 
     # print(Zg)
     # print(Zp)
-    Cg_list = 1/(-1*fRange*2*np.pi*Zg)
-    Cp_list = 1/(-1*fRange*2*np.pi*Zp)
+    Cg_list = np.real(1/(1j*fRange*2*np.pi*Zg))
+    Cp_list = np.real(1/(1j*fRange*2*np.pi*Zp))
 
     Cg = sum(Cg_list)/len(Cg_list)
     Cp = sum(Cp_list)/len(Cp_list)
@@ -183,11 +183,11 @@ if __name__ == '__main__':
 
     ABCDgap = getABCDGap(ABCDline, ABCDtotal)
 
-    plotAB(ABCDgap)
+    # plotAB(ABCDtotal)
 
     Cg, Cp, Cg_list, Cp_list = getCapacitances(ABCDgap, fRange)
-
-    PlotCpCg(Cg_list, Cp_list, fRange)
-
+    #
+    # PlotCpCg(Cg_list, Cp_list, fRange)
+    #
     print(f"Cg = {Cg}, Cp = {Cp}")
 
