@@ -2,13 +2,15 @@ import skrf as rf
 import numpy as np
 import matplotlib.pyplot as plt
 #------Variables-------
-epseff = 1.87
+# epseff = 1.87
+epseff = 1.9146
     #effective relative permittivity
 l = 20e-3
     #length [m]
 c0 = 3e8
     #light velocity free space [m/s]
-Z0 = 51.19
+# Z0 = 51.19
+Z0 = 50.59
 
 #------Functions------
 def getABCDGap(ABCDline, ABCDtotal):
@@ -62,12 +64,12 @@ def ReadTXT(Path):
             columns = line.split()
 
             # Ensure the line has exactly 3 columns (frequency, real, imaginary)
-            if len(columns) == 2 or len(columns) == 3:
+            if len(columns) >= 2 :
                 # Append the values to the respective lists
-                frequency.append(float(columns[0]))
-                real_part.append(float(columns[1]))
-                if len(columns) == 3:
-                    imaginary_part.append(float(columns[2]))
+                frequency.append(float(columns[0].replace(",", ".")))
+                real_part.append(float(columns[1].replace(",", ".")))
+                if len(columns) >= 3:
+                    imaginary_part.append(float(columns[2].replace(",", ".")))
 
 
     return np.array(frequency), np.array(real_part), np.array(imaginary_part)
@@ -123,21 +125,21 @@ def PlotCpCg(Cg_list, Cp_list, fRange):
     plt.figure(figsize=(12, 4))
 
     # Plot Cp vs frequency
-    # plt.plot(fRange*1e-9, Cp_list*1e12, label='Cp', color='blue', linestyle='--')
+    plt.plot(fRange*1e-9, Cp_list*1e12, label='Cp', color='blue', linestyle='--')
 
     # Plot Cg vs frequency
-    plt.plot(fRange*1e-9, Cg_list*1e12, label='Cg', color='green', linestyle='--')
+    # plt.plot(fRange*1e-9, Cg_list*1e12, label='Cg', color='green', linestyle='--')
 
     # Adding labels and title
     plt.xlabel('Frequency (GHz)')
     plt.ylabel('Capacitance (pF)')
-    plt.title('Cg vs Frequency')
+    plt.title('Cp vs Frequency')
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
     # plt.ylim(20,70)
     plt.xlim(5,10)
-    plt.savefig("A2c_Cg_plot")
+    plt.savefig("B_halfmm_Cp_plot")
 
     # Show plot
     plt.show()
@@ -168,8 +170,8 @@ def getCapacitances(ABCDgap, fRange):
 if __name__ == '__main__':
 
     #Get the values for the S11
-    fRange, S11Real, S11Imag = ReadTXT("A1_S11_parameters_RealImag.txt")
-    _ , S12Real, S12Imag = ReadTXT("A1_S12_parameters_RealImag.txt")
+    fRange, S11Real, S11Imag = ReadTXT("3Ds11_kleineregap.txt")
+    _ , S12Real, S12Imag = ReadTXT("3Ds12_kleineregap.txt")
 
     fRange *= 1e9 #convert to GHz
 
@@ -187,7 +189,7 @@ if __name__ == '__main__':
 
     Cg, Cp, Cg_list, Cp_list = getCapacitances(ABCDgap, fRange)
     #
-    # PlotCpCg(Cg_list, Cp_list, fRange)
+    PlotCpCg(Cg_list, Cp_list, fRange)
     #
     print(f"Cg = {Cg}, Cp = {Cp}")
 
